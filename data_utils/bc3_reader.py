@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from data_utils.data_reader import Dataset
 
 class BC3Dataset(Dataset):
