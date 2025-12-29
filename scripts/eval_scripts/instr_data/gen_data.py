@@ -142,85 +142,40 @@ def main(source_data, target_format, input_file=''):
     isExist = os.path.exists(output_dir)
     if not isExist:os.makedirs(output_dir)
         
+    data_loaders = {
+        'convai2_grade': load_grade_data,
+        'dailydialog_grade': load_grade_data,
+        'empatheticdialogues_grade': load_grade_data,
+        'personachat_usr': load_usr_data,
+        'topicalchat_usr': load_usr_data,
+        'fed_dialog': load_fed_dialog_data,
+        'instr': load_instr_data,
+        'dstc6': load_dstc6_data,
+        'fed': load_fed_data,
+        'holistic': load_holistic_data,
+        'dstc9': load_dstc9_data,
+        'engage': load_engage_data
+    }
 
-    if source_data == 'convai2_grade':
-        model_names = ['bert_ranker', 'dialogGPT', 'transformer_generator', 'transformer_ranker']
+    if source_data in ['convai2_grade', 'dailydialog_grade', 'empatheticdialogues_grade']:
+        model_names = ['bert_ranker', 'dialogGPT', 'transformer_generator', 'transformer_ranker'] if source_data == 'convai2_grade' else ['transformer_generator', 'transformer_ranker']
         for model in model_names:
             data_path = f'{os.getcwd()}/data/grade_data'
-            data = load_grade_data(data_path, 'convai2', model)
+            data = load_grade_data(data_path, source_data.split('_')[0], model)
             if format_type == 0:
-                output_path = f'{output_dir}/convai2_grade_{model}{suffix}'
+                output_path = f'{output_dir}/{source_data}_{model}{suffix}'
                 gen_data(data, output_path)
             elif format_type == 1:            
                 gen_data(data, output_dir, f'{source_data}_{model}')
 
-    elif source_data == 'dailydialog_grade':
-        model_names = ['transformer_generator', 'transformer_ranker']
-        for model in model_names:
-            data_path = f'{os.getcwd()}/data/grade_data'
-            data = load_grade_data(data_path, 'dailydialog', model)
-            if format_type == 0:
-                output_path = f'{output_dir}/dailydialog_grade_{model}{suffix}'
-                gen_data(data, output_path)
-            elif format_type == 1:
-                gen_data(data, output_dir, f'{source_data}_{model}')
-
-    elif source_data == 'empatheticdialogues_grade':
-        model_names = ['transformer_generator', 'transformer_ranker']
-        for model in model_names:
-            data_path = f'{os.getcwd()}/data/grade_data'
-            data = load_grade_data(data_path, 'empatheticdialogues', model)
-            if format_type == 0:
-                output_path = f'{output_dir}/empatheticdialogues_grade_{model}{suffix}'
-                gen_data(data, output_path)
-            elif format_type == 1:
-                gen_data(data, output_dir, f'{source_data}_{model}')
-    
-    elif source_data == 'personachat_usr':
-        data_path = f'{os.getcwd()}/data/usr_data'
-        data = load_usr_data(data_path, 'personachat')
-        
-        if format_type == 0:
-            output_path = f'{output_dir}/personachat_usr{suffix}'
-            gen_data(data, output_path)
-        elif format_type == 1:
-            gen_data(data, output_dir, 'personachat_usr')
-    
-    elif source_data == 'topicalchat_usr':
-        data_path = f'{os.getcwd()}/data/usr_data'
-        data = load_usr_data(data_path, 'topicalchat')
-        if format_type == 0:
-            output_path = f'{output_dir}/topicalchat_usr{suffix}'
-            gen_data(data, output_path)
-        elif format_type == 1:
-            gen_data(data, output_dir, 'topicalchat_usr')
-    
-    elif source_data == 'fed_dialog':
-        data_path = f'{os.getcwd()}/data/fed_data'
-        data = load_fed_dialog_data(data_path)
-        if format_type == 0:
-            output_path = f'{output_dir}/fed_dialog{suffix}'
-            gen_data(data, output_path)
-        elif format_type == 1:
-            gen_data(data, output_dir, 'fed_dialog')
-    elif source_data == 'instr':
-        data_path = f'{os.getcwd()}/data/instr_data'
-        data = load_instr_data(data_path, input_file=input_file)
-        if format_type == 0:
-            output_path = f'{output_dir}/{source_data}{suffix}'
-            gen_data(data, output_path)
-        elif format_type == 1:
-            gen_data(data, output_dir, source_data)
-    else:
+    elif source_data in data_loaders:
         data_path = f'{os.getcwd()}/data/{source_data}_data'
-
-        data = eval(f'load_{source_data}_data')(data_path)
+        data = data_loaders[source_data](data_path, input_file=input_file if source_data == 'instr' else None)
         if format_type == 0:
             output_path = f'{output_dir}/{source_data}{suffix}'
             gen_data(data, output_path)
         elif format_type == 1:
             gen_data(data, output_dir, source_data)
-    
     
 if __name__ == '__main__':
     args = parse_args()
